@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Hass Kiosk</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Unconfigured state -->
+  <div id="hello-world">
+    <h1>Hass Kiosk</h1>
+    <p>Tap the gear button to configure your dashboard URL.</p>
+  </div>
+
+  <!-- Kiosk iframe -->
+  <iframe id="kiosk-frame" allow="fullscreen; autoplay; camera; microphone"></iframe>
+
+  <!-- Floating menu button -->
+  <button id="menu-btn" aria-label="Settings">&#9881;</button>
+
+  <!-- Settings modal -->
+  <div id="settings-modal">
+    <div class="modal-content">
+      <h2>Settings</h2>
+
+      <div class="field">
+        <label for="setting-url">Dashboard URL</label>
+        <input type="url" id="setting-url" placeholder="https://homeassistant.local:8123">
+      </div>
+
+      <div class="field">
+        <label for="setting-refresh">Auto-refresh (minutes, 0 = off)</label>
+        <input type="number" id="setting-refresh" min="0" step="1" placeholder="0">
+      </div>
+
+      <div class="field-checkbox">
+        <input type="checkbox" id="setting-interaction" checked>
+        <label for="setting-interaction">Restart timer on interaction</label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btn-cancel">Cancel</button>
+        <button class="btn-save" id="btn-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/settings.js"></script>
+  <script src="js/auto-refresh.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
