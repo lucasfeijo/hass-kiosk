@@ -10,6 +10,76 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('btn-save');
   const cancelBtn = document.getElementById('btn-cancel');
   const openSettingsBtn = document.getElementById('open-settings-btn');
+  const iframeError = document.getElementById('iframe-error');
+  const iframeErrorMsg = document.getElementById('iframe-error-msg');
+  const iframeErrorUrl = document.getElementById('iframe-error-url');
+  const iframeErrorRetry = document.getElementById('iframe-error-retry');
+  const iframeErrorSettings = document.getElementById('iframe-error-settings');
+
+  let loadTimeout = null;
+
+  function showIframeError(msg) {
+    if (msg) iframeErrorMsg.textContent = msg;
+    iframeError.classList.add('visible');
+  }
+
+  function hideIframeError() {
+    iframeError.classList.remove('visible');
+  }
+
+  async function probeUrl(url) {
+    // Attempt a no-cors fetch to distinguish network failures from framing blocks.
+    // A framing block means the server IS reachable but refuses embedding.
+    try {
+      await fetch(url, { mode: 'no-cors', cache: 'no-store' });
+      // Reachable — the server responded (possibly blocking frames)
+      return 'The page refused to be displayed in a frame.';
+    } catch (e) {
+      return `Could not connect: ${e.message}`;
+    }
+  }
+
+  async function checkIframeLoad(url) {
+    // If contentDocument is accessible (same-origin), the browser rendered a
+    // local error page — the remote content never loaded.
+    // If it throws SecurityError, cross-origin content loaded — that's success.
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || doc.body.innerHTML.trim() === '') {
+        const reason = await probeUrl(url);
+        showIframeError(reason);
+      }
+    } catch (e) {
+      // SecurityError: cross-origin page loaded successfully
+      hideIframeError();
+    }
+  }
+
+  function loadFrameUrl(url) {
+    hideIframeError();
+    iframeErrorUrl.textContent = url;
+    clearTimeout(loadTimeout);
+    frame.src = url;
+
+    // Fallback timeout in case load event never fires
+    loadTimeout = setTimeout(async () => {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc || doc.body.innerHTML.trim() === '') {
+          const reason = await probeUrl(url);
+          showIframeError(reason);
+        }
+      } catch (e) {
+        // Cross-origin — loaded fine
+      }
+    }, 15000);
+  }
+
+  frame.addEventListener('load', () => {
+    clearTimeout(loadTimeout);
+    const url = Settings.load().url;
+    if (url) checkIframeLoad(url);
+  });
 
   // Register service worker
   if ('serviceWorker' in navigator) {
@@ -21,12 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const s = Settings.load();
 
     if (s.url) {
-      frame.src = s.url;
       frame.classList.add('active');
       helloWorld.style.display = 'none';
+      loadFrameUrl(s.url);
     } else {
       frame.classList.remove('active');
       frame.removeAttribute('src');
+      hideIframeError();
       helloWorld.style.display = '';
     }
 
@@ -34,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     AutoRefresh.stop();
     if (s.url && s.autoRefreshMinutes > 0) {
       AutoRefresh.start(s.autoRefreshMinutes, () => {
-        frame.src = s.url;
+        loadFrameUrl(s.url);
       });
       if (s.restartTimerOnInteraction) {
         AutoRefresh.attachInteractionListeners();
@@ -76,6 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModal();
     applySettings();
   }
+
+  // Iframe error buttons
+  iframeErrorRetry.addEventListener('click', () => {
+    const s = Settings.load();
+    if (s.url) loadFrameUrl(s.url);
+  });
+  iframeErrorSettings.addEventListener('click', openModal);
 
   // Event listeners
   menuBtn.addEventListener('click', openModal);

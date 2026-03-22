@@ -23,6 +23,20 @@
   <!-- Kiosk iframe -->
   <iframe id="kiosk-frame" allow="fullscreen; autoplay; camera; microphone"></iframe>
 
+  <!-- Iframe load error overlay -->
+  <div id="iframe-error">
+    <div class="iframe-error-box">
+      <div class="iframe-error-icon">⚠️</div>
+      <h2>Can't display the page</h2>
+      <p id="iframe-error-msg">Failed to load the configured URL.</p>
+      <p id="iframe-error-url" class="iframe-error-url"></p>
+      <div class="iframe-error-actions">
+        <button id="iframe-error-retry">Retry</button>
+        <button id="iframe-error-settings">Settings</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Floating menu button -->
   <button id="menu-btn" aria-label="Settings">&#9881;</button>
 

@@ -68,6 +68,88 @@ html, body {
   display: block;
 }
 
+/* Iframe error overlay */
+#iframe-error {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #121212;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#iframe-error.visible {
+  display: flex;
+}
+
+.iframe-error-box {
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+
+.iframe-error-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.iframe-error-box h2 {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.iframe-error-box p {
+  font-size: 0.9rem;
+  color: #999;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.iframe-error-url {
+  font-size: 0.8rem !important;
+  color: #555 !important;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.iframe-error-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.iframe-error-actions button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#iframe-error-retry {
+  background: #4a9eff;
+  color: #fff;
+}
+
+#iframe-error-retry:hover {
+  background: #3a8eef;
+}
+
+#iframe-error-settings {
+  background: #333;
+  color: #ccc;
+}
+
+#iframe-error-settings:hover {
+  background: #444;
+}
+
 /* Floating menu button */
 #menu-btn {
   position: fixed;
