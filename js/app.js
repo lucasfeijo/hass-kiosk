@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const interactionCheck = document.getElementById('setting-interaction');
   const saveBtn = document.getElementById('btn-save');
   const cancelBtn = document.getElementById('btn-cancel');
+  const openSettingsBtn = document.getElementById('open-settings-btn');
 
   // Register service worker
   if ('serviceWorker' in navigator) {
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Event listeners
   menuBtn.addEventListener('click', openModal);
+  openSettingsBtn.addEventListener('click', openModal);
   cancelBtn.addEventListener('click', closeModal);
   saveBtn.addEventListener('click', saveSettings);
 

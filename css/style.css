@@ -36,6 +36,22 @@ html, body {
   color: #888;
 }
 
+#open-settings-btn {
+  margin-top: 8px;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  background: #4a9eff;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#open-settings-btn:hover {
+  background: #3a8eef;
+}
+
 /* Kiosk iframe */
 #kiosk-frame {
   position: fixed;
