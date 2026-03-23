@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hass-kiosk-v4';
+const CACHE_NAME = 'hass-kiosk-v6';
 const SHELL_FILES = [
   './',
   './index.html',

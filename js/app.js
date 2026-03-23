@@ -17,68 +17,52 @@ document.addEventListener('DOMContentLoaded', () => {
   const iframeErrorSettings = document.getElementById('iframe-error-settings');
 
   let loadTimeout = null;
+  let lastLoadFailed = false;
 
   function showIframeError(msg) {
     if (msg) iframeErrorMsg.textContent = msg;
     iframeError.classList.add('visible');
+    lastLoadFailed = true;
   }
 
   function hideIframeError() {
     iframeError.classList.remove('visible');
+    lastLoadFailed = false;
   }
 
-  async function probeUrl(url) {
-    // Attempt a no-cors fetch to distinguish network failures from framing blocks.
-    // A framing block means the server IS reachable but refuses embedding.
-    try {
-      await fetch(url, { mode: 'no-cors', cache: 'no-store' });
-      // Reachable — the server responded (possibly blocking frames)
-      return 'The page refused to be displayed in a frame.';
-    } catch (e) {
-      return `Could not connect: ${e.message}`;
-    }
-  }
-
-  async function checkIframeLoad(url) {
-    // If contentDocument is accessible (same-origin), the browser rendered a
-    // local error page — the remote content never loaded.
-    // If it throws SecurityError, cross-origin content loaded — that's success.
+  function checkIframeLoad() {
     try {
       const doc = frame.contentDocument;
-      if (!doc || doc.body.innerHTML.trim() === '') {
-        const reason = await probeUrl(url);
-        showIframeError(reason);
+      if (doc === null) {
+        // Cross-origin content loaded (some browsers return null instead of throwing)
+        hideIframeError();
+        return;
+      }
+      // Accessible contentDocument means browser rendered a local/blank page — load failed
+      if (!doc.body || doc.body.innerHTML.trim() === '') {
+        showIframeError('Page failed to load.');
       }
     } catch (e) {
-      // SecurityError: cross-origin page loaded successfully
+      // SecurityError: cross-origin content loaded successfully
       hideIframeError();
     }
   }
 
   function loadFrameUrl(url) {
-    hideIframeError();
+    if (!lastLoadFailed) hideIframeError();
     iframeErrorUrl.textContent = url;
     clearTimeout(loadTimeout);
     frame.src = url;
 
     // Fallback timeout in case load event never fires
-    loadTimeout = setTimeout(async () => {
-      try {
-        const doc = frame.contentDocument;
-        if (!doc || doc.body.innerHTML.trim() === '') {
-          const reason = await probeUrl(url);
-          showIframeError(reason);
-        }
-      } catch (e) {
-        // Cross-origin — loaded fine
-      }
-    }, 15000);
+    loadTimeout = setTimeout(() => {
+      checkIframeLoad();
+    }, 8000);
   }
 
   frame.addEventListener('load', () => {
     clearTimeout(loadTimeout);
-    const url = Settings.load().url;
-    if (url) checkIframeLoad(url);
+    checkIframeLoad();
   });
 
   // Register service worker
@@ -105,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     AutoRefresh.stop();
     if (s.url && s.autoRefreshMinutes > 0) {
       AutoRefresh.start(s.autoRefreshMinutes, () => {
-        loadFrameUrl(s.url);
+        if (!lastLoadFailed) loadFrameUrl(s.url);
       });
       if (s.restartTimerOnInteraction) {
         AutoRefresh.attachInteractionListeners();
@@ -150,6 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Iframe error buttons
   iframeErrorRetry.addEventListener('click', () => {
+    lastLoadFailed = false;
+    hideIframeError();
     const s = Settings.load();
     if (s.url) loadFrameUrl(s.url);
   });
